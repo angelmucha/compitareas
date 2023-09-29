@@ -11,7 +11,7 @@ using namespace std;
 
 class Instruction {
 public:
-  enum IType { IPUSH=0, IPOP, IDUP, ISWAP, IADD, ISUB, IMUL, IDIV, IGOTO, IJMPEQ, IJMPGT, IJMPGE, IJMPLT, IJMPLE, ISKIP, ISTORE, ILOAD, IPRINT };
+  enum IType { IPUSH=0, IPOP, IDUP, ISWAP, IADD, ISUB, IMUL, IDIV, IGOTO, IJMPEQ, IJMPGT, IJMPGE, IJMPLT, IJMPLE, ISKIP, ISTORE, ILOAD, IPRINT, IFACTORIAL};
   string label, jmplabel;
   IType type;
   bool hasarg;

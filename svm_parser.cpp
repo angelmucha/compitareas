@@ -7,7 +7,7 @@
 
 #include "svm_parser.hh"
 
-const char* Token::token_names[24] = { "ID", "LABEL", "NUM", "EOL", "ERR", "END", "PUSH", "JMEPEQ", "JMPGT", "JMPGE", "JMPLT", "JMPLE", "GOTO", "SKIP", "POP", "DUP", "SWAP", "ADD", "SUB", "MUL", "DIV", "STORE", "LOAD", "PRINT" };
+const char* Token::token_names[25] = { "ID", "LABEL", "NUM", "EOL", "ERR", "END", "PUSH", "JMEPEQ", "JMPGT", "JMPGE", "JMPLT", "JMPLE", "GOTO", "SKIP", "POP", "DUP", "SWAP", "ADD", "SUB", "MUL", "DIV", "STORE", "LOAD", "PRINT", "FACTORIAL" };
 
 Token::Token(Type type):type(type) { lexema = ""; }
 
@@ -49,6 +49,7 @@ Scanner::Scanner(string s):input(s),first(0),current(0) {
   reserved["store"] = Token::STORE;
   reserved["load"] = Token::LOAD;
   reserved["print"] = Token::PRINT;
+  reserved["factorial"] = Token::FACTORIAL;
 }
 
 Token* Scanner::nextToken() {
@@ -57,8 +58,16 @@ Token* Scanner::nextToken() {
   string lex;
   Token::Type ttype;
   c = nextChar();
+
   while (c == ' ') c = nextChar();
+
+  // For comments
+  if (c == '%') {
+    while (c != '\n') c = nextChar();
+  }
+
   if (c == '\0') return new Token(Token::END);
+
   startLexema();
   state = 0;
   while (1) {
@@ -167,6 +176,7 @@ Instruction::IType Token::tokenToIType(Token::Type tt) {
   case(Token::JMPLE): itype = Instruction::IJMPLE; break;
   case(Token::SKIP): itype = Instruction::ISKIP; break;
   case(Token::SWAP): itype = Instruction::ISWAP; break;
+  case(Token::FACTORIAL): itype = Instruction::IFACTORIAL; break;
 
   default: cout << "Error: Unknown Keyword type" << endl; exit(0);
   }
@@ -252,7 +262,7 @@ Instruction* Parser::parseInstruction() {
   }
 
   if (match(Token::POP) || match(Token::ADD)  || match(Token::SUB) || match(Token::MUL) || match(Token::DIV) ||
-    match(Token::PRINT) || match(Token::SKIP) || match(Token::DUP) || match(Token::SWAP) ) {  // mas casos
+    match(Token::PRINT) || match(Token::SKIP) || match(Token::DUP) || match(Token::SWAP) || match(Token::FACTORIAL) ) {  // mas casos
     tipo = 0;
     ttype = previous->type;
   } else if (match(Token::PUSH) || match(Token::STORE) || match(Token::LOAD)) { // mas casos

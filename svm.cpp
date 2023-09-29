@@ -2,7 +2,7 @@
 
 #include "svm.hh"
 
-string snames[18] = { "push", "pop", "dup", "swap", "add", "sub", "mult", "div", "goto", "jmpeq", "jmpgt", "jmpge", "jmplt", "jmple", "skip", "store", "load", "print" };
+string snames[19] = { "push", "pop", "dup", "swap", "add", "sub", "mult", "div", "goto", "jmpeq", "jmpgt", "jmpge", "jmplt", "jmple", "skip", "store", "load", "print", "factorial" };
 
 Instruction::Instruction(string l, IType itype):label(l),type(itype),hasarg(false) {
 }
@@ -53,7 +53,8 @@ void SVM::execute(Instruction* instr) {
   Instruction::IType itype = instr->type;
   int next, top;
   //cout << "type: " << itype << endl;
-  if (itype==Instruction::IPOP || itype==Instruction::IDUP || itype==Instruction::IPRINT || itype==Instruction::ISKIP) {
+  if (itype==Instruction::IPOP || itype==Instruction::IDUP || itype==Instruction::IPRINT || itype==Instruction::ISKIP
+      || itype == Instruction::IFACTORIAL) {
     switch (itype) {
     case(Instruction::IPOP):
       if (opstack.empty()) perror("Can't pop from an empty stack");
@@ -63,6 +64,18 @@ void SVM::execute(Instruction* instr) {
       opstack.push(opstack.top()); break;
     case(Instruction::IPRINT): print_stack(); break;
     case(Instruction::ISKIP): break;
+
+    // Add for factorial
+    case(Instruction::IFACTORIAL):
+      if (opstack.empty()) perror("Cant do factorial on empty stack");
+        
+      next=1;
+      top = opstack.top();
+      opstack.pop();
+      for (int i=1; i <= top; i++) next = next * i;
+      opstack.push(next);
+      break;
+
     default: perror("Programming Error 1");
     }
     pc++;
