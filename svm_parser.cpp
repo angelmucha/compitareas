@@ -166,6 +166,7 @@ Instruction::IType Token::tokenToIType(Token::Type tt) {
   case(Token::JMPLT): itype = Instruction::IJMPLT; break;
   case(Token::JMPLE): itype = Instruction::IJMPLE; break;
   case(Token::SKIP): itype = Instruction::ISKIP; break;
+  case(Token::SWAP): itype = Instruction::ISWAP; break;
 
   default: cout << "Error: Unknown Keyword type" << endl; exit(0);
   }
@@ -241,10 +242,14 @@ Instruction* Parser::parseInstruction() {
   string label = "";
   string jmplabel;
   Token::Type ttype;
-  int tipo = 0; // 0 no args, 1 un arg entero,  1 un arg label
-  
+  int tipo = 0; // 0 no args, 1 un arg entero,  2 un arg label
+  int num = 0;
+  string label2 = "";
   // match label, si existe
-
+  if(match(Token::LABEL)) {
+    label = previous->lexema;
+    label.pop_back(); // quitar el :
+  }
 
   if (match(Token::POP) || match(Token::ADD)  || match(Token::SUB) || match(Token::MUL) || match(Token::DIV) ||
     match(Token::PRINT) || match(Token::SKIP) || match(Token::DUP) || match(Token::SWAP) ) {  // mas casos
@@ -253,12 +258,33 @@ Instruction* Parser::parseInstruction() {
   } else if (match(Token::PUSH) || match(Token::STORE) || match(Token::LOAD)) { // mas casos
     tipo = 1;
     ttype = previous->type;
+    if(match(Token::NUM)){
+      tipo = 1;
+      //cout<<previous->lexema<<endl;
+      stringstream geek(previous->lexema);
+      
+      geek >> num;
+      //cout<<num<<endl;}
+    }else{
+      cout << "Error: no pudo encontrar match para " << current << endl;  
+      exit(0);
+    }
     
   } else if (match(Token::GOTO) || match(Token::JMPEQ) || match(Token::JMPGT) || match(Token::JMPGE) ||
            match(Token::JMPLT) || match(Token::JMPLE)) { // mas casos
     tipo = 2;
     ttype = previous->type;
-    
+    if(match(Token::ID)){
+      tipo = 2;
+      label2 = previous->lexema;
+      
+      //cout<<label2<<endl;
+    }
+    else{
+      cout << "Error: no pudo encontrar match para " << current << endl;  
+      exit(0);
+    }
+
   } else {
     cout << "Error: no pudo encontrar match para " << current << endl;  
     exit(0);
@@ -266,6 +292,7 @@ Instruction* Parser::parseInstruction() {
 
  
   if (!match(Token::EOL)) {
+    cout<<current->type<<endl;
     cout << "esperaba fin de linea" << endl;
     exit(0);
   }
@@ -273,22 +300,18 @@ Instruction* Parser::parseInstruction() {
   if (tipo == 0) {
     instr = new Instruction(label, Token::tokenToIType(ttype));
   } 
+  else if(tipo == 1){
+
+    instr = new Instruction(label, Token::tokenToIType(ttype), num);// le paso el numero
+  }
   else if (tipo == 2) {
-    instr = new Instruction(label, Token::tokenToIType(ttype), jmplabel);
+    instr = new Instruction(label, Token::tokenToIType(ttype), label2); // le paso el label
   } else { //
-    if (match(Token::NUM)) {
-      instr = new Instruction(label, Token::tokenToIType(ttype), atoi(previous->lexema.c_str()));
-    } else if (match(Token::LABEL)) {
-      instr = new Instruction(label, Token::tokenToIType(ttype), previous->lexema);
-    } else {
-      cout << "Error: no pudo encontrar match para " << current << endl;  
-      exit(0);
-    }
+    //cout<<tipo<<endl;
+    cout << "Error: no pudo encontrar match para " << current << endl;
+    
   }
 			   
 
   return instr;
 }
-
-				    
-
